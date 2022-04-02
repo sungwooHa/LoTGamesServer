@@ -55,9 +55,43 @@ pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<Ve
     )
     .execute(&*conn)
 
-    query::get_user_by_wallet_address(&conn, wallet_address)
+    query::get::user::by_wallet_address(&conn, wallet_address)
         .map(|user| Json(user))
         .map_err(|err| error_status(err))
+}
+
+#[get("/users/verify/<uuid>,<verify_eamil_hash>")]
+pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email_hash : String) -> Result<_, Status>{
+    
+    query::get::user::by_uuid_with_email_hash(&conn, uuid, verify_eamil_hash)
+    .err(|err| error_status(err));
+
+    //없을 때는?
+    //verify_eamil을 true로 바꿔주기
+    //이미 있는 경우엔 어떻게 할까?
+
+}
+
+#[post("users/<email>, <wallet_address>")]
+pub fn sign_in(conn : Conn, email : String, wallet_address : String) -> Result<_, Status>{
+
+    //db insert,
+    //send mail.
+
+    //step1. verify_eamil_hash와 만들기
+    //step2. verify_eamil_hash와 wallet_address로 table insert.
+    //step3. mail 로 uuid와 vverify_eamil_hash와
+
+}
+
+#[put("users/<wallet_address>, <txhash>, <nickname>")]
+pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String) -> Result<_, Status>{
+
+    //wallet address로 찾음
+    //txhash, nickname 맞춰줌
+    query::get::user::by_wallet_address(&conn, wallet_address)
+    .map(|user| Json(user))
+    .map_err(|err| error_status(err))
 }
 
 fn error_status(err : Error) ->Status{

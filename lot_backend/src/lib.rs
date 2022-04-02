@@ -23,11 +23,10 @@ pub fn rocket() -> rocket::Rocket {
     rocket::ignite()
     .manage(db::connection::init_pool())
     .mount("/",
-        routes![
-            routes::user_manage::index,
-            routes::user_manage::hello, 
-            routes::user_manage::db,
+        routes![, 
+            //routes::user_manage::db,
             routes::user_manage::get_user_by_wallet,
+            
             ],
     )
 }
