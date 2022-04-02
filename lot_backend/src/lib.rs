@@ -22,13 +22,11 @@ mod routes;
 pub fn rocket() -> rocket::Rocket {
     rocket::ignite()
     .manage(db::connection::init_pool())
-    .mount(
-        "/v1",
+    .mount("/",
         routes![
             routes::user_manage::index,
             routes::user_manage::hello, 
             routes::user_manage::db_test,
             ],
     )
-    // .attach(Template::fairing())
 }
