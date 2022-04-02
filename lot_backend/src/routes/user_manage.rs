@@ -6,6 +6,7 @@ use crate::db::schema;
 use crate::db::connection::Conn;
 use crate::db::query;
 
+use chrono::Utc;
 use diesel::{self, prelude::*};
 use diesel::result::Error;
 use rocket_contrib::json::Json;
@@ -22,30 +23,30 @@ pub fn index() -> &'static str {
 pub fn hello() -> Json<User>{
     let user = User{
         uuid : 12345,
-        userID : "user_id".to_string(),
-        userPW : "user_pw".to_string(),
-        nickname : "nickname".to_string(),
-        exceptArena : 100,
-        regLastLoginDate : NaiveDate::from_ymd(2022, 4, 3).and_hms(1,1,1),
-        regDate : NaiveDate::from_ymd(2022, 4, 3).and_hms(1,1,1),
-        regIP : "reg_ip".to_string(),
-        walletAddress : "wallet_address".to_string(),
-        verifyEmailHash : "verify_email_hash".to_string(),
-        verifyEmail : 1,
-        txHash : "tx_hash".to_string(),
+        userID : None,
+        userPW : Some("user_pw".to_string()),
+        nickname : Some("nickname".to_string()),
+        exceptArena : Some(100),
+        regLastLoginDate : Some(Utc::now().naive_utc()),
+        regDate : Some(Utc::now().naive_utc()),
+        regIP : Some("reg_ip".to_string()),
+        walletAddress : Some("wallet_address".to_string()),
+        verifyEmailHash : Some("verify_email_hash".to_string()),
+        verifyEmail : Some(1),
+        txHash : Some("tx_hash".to_string())
     };
     Json(user)
 }
 
-#[get("/db_test")]
-pub fn db_test(conn: Conn) -> Result<Json<Vec<User>>, Status> {
+#[get("/db")]
+pub fn db(conn: Conn) -> Result<Json<Vec<User>>, Status> {
     let result = query::show_users(&conn)
         .map(|user| Json(user))
         .map_err(|err| error_status(err));
 
-        for user in query::show_users(&conn).unwrap(){
-            println!("{:?}", user);
-        }
+        // for user in query::show_users(&conn).unwrap(){
+        //     println!("{:?}", user);
+        // }
 
     result
 }

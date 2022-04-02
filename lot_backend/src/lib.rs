@@ -26,7 +26,7 @@ pub fn rocket() -> rocket::Rocket {
         routes![
             routes::user_manage::index,
             routes::user_manage::hello, 
-            routes::user_manage::db_test,
+            routes::user_manage::db,
             ],
     )
 }
