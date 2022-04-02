@@ -1,0 +1,2 @@
+[global.databases.my_db]
+url = "mysql://root:31525660@lot_server/tbl_user"

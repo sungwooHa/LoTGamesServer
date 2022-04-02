@@ -1,0 +1,26 @@
+[package]
+name = "lot_backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#rocket server
+rocket = "0.4.10"
+rocket_contrib = { version = "0.4.10", features = ["json", "diesel_mysql_pool"] }
+
+#date and time
+chrono = { version = "0.4.6", features = ["serde"] }
+
+r2d2 = "*"
+r2d2-diesel = "*"
+
+#for connection with the mysql DB
+diesel = { version = "1.4.8", features = ["mysql", "chrono"] }
+dotenv = "0.15.0"
+
+# Serialization/Deserialization
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"

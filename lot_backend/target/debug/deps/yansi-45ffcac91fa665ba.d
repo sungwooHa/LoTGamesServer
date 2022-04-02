@@ -1,0 +1,12 @@
+d:\Development\05. Rust\LoT_Server\LoTGamesServer\lot_backend\target\debug\deps\yansi-45ffcac91fa665ba.rmeta: C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\lib.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\macros.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\windows.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\paint.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\style.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\color.rs
+
+d:\Development\05. Rust\LoT_Server\LoTGamesServer\lot_backend\target\debug\deps\libyansi-45ffcac91fa665ba.rlib: C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\lib.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\macros.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\windows.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\paint.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\style.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\color.rs
+
+d:\Development\05. Rust\LoT_Server\LoTGamesServer\lot_backend\target\debug\deps\yansi-45ffcac91fa665ba.d: C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\lib.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\macros.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\windows.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\paint.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\style.rs C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\color.rs
+
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\lib.rs:
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\macros.rs:
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\windows.rs:
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\paint.rs:
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\style.rs:
+C:\Users\ttlhi\.cargo\registry\src\github.com-1ecc6299db9ec823\yansi-0.5.1\src\color.rs:
