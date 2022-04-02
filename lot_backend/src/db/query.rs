@@ -1,5 +1,6 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 
+use diesel::query_builder::IncompleteInsertStatement;
 use diesel::{self, prelude::*};
 use crate::db::models::User;
 use crate::db::schema::tbl_user::dsl::*;
@@ -14,4 +15,8 @@ pub fn show_users(conn: &MysqlConnection) -> QueryResult<Vec<User>> {
     // }).map(Json)
 
     tbl_user.limit(5).load::<User>(&*conn)
+}
+
+pub fn get_user_by_wallet_address(conn : &MysqlConnection, _wallet_address : String) -> QueryResult<Vec<User>> {
+    tbl_user.limit(1).filter(walletAddress.eq(_wallet_address)).load::<User>(&*conn)
 }

@@ -27,6 +27,7 @@ pub fn rocket() -> rocket::Rocket {
             routes::user_manage::index,
             routes::user_manage::hello, 
             routes::user_manage::db,
+            routes::user_manage::get_user_by_wallet,
             ],
     )
 }

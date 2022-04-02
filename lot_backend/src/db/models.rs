@@ -4,6 +4,8 @@ use crate::db::schema::tbl_user;
 #[allow(non_snake_case)]
 #[derive(Queryable, AsChangeset, Serialize, Deserialize, Debug, Clone)]
 #[table_name = "tbl_user"]
+
+#[derive(Default)]
 pub struct User {
     pub uuid : i64,
     pub userID : Option<String>,
@@ -18,6 +20,16 @@ pub struct User {
     pub verifyEmail : Option<u8>,
     pub txHash : Option<String>,
 }
+
+impl User {
+    pub fn new_email_hash(verify_email_hash : String) -> User{
+        User {
+            verifyEmailHash : Some(verify_email_hash),
+            ..Default::default()
+        }
+    }
+}
+
 
 #[allow(non_snake_case)]
 #[derive(/*Queryable, AsChangeset,*/ Serialize, Deserialize)]

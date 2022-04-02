@@ -40,15 +40,24 @@ pub fn hello() -> Json<User>{
 
 #[get("/db")]
 pub fn db(conn: Conn) -> Result<Json<Vec<User>>, Status> {
-    let result = query::show_users(&conn)
+    query::show_users(&conn)
         .map(|user| Json(user))
-        .map_err(|err| error_status(err));
+        .map_err(|err| error_status(err))
+}
 
-        // for user in query::show_users(&conn).unwrap(){
-        //     println!("{:?}", user);
-        // }
+#[get("/users/address/<wallet_address>")]
+pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<Vec<User>>, Status> {
 
-    result
+    diesel::insert_into(tbl_user)
+    .values(&vec![
+        (verifyEmailHash.eq(Some(verify_email_hash))),
+        ]
+    )
+    .execute(&*conn)
+
+    query::get_user_by_wallet_address(&conn, wallet_address)
+        .map(|user| Json(user))
+        .map_err(|err| error_status(err))
 }
 
 fn error_status(err : Error) ->Status{
