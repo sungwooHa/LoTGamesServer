@@ -90,10 +90,9 @@ pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email
 //         (verifyEmailHash.eq(Some(verify_email_hash))),
 //         ]
 //     )
-//     .execute(&*conn)?;
+//     .execute(&*conn)
+//     .expect("can't make email");
 
-    
-//     Ok< ,Status()>
 // }
 
 // #[put("users/<wallet_address>/<txhash>/<nickname>")]
