@@ -2,10 +2,8 @@ use chrono::NaiveDateTime;
 use crate::db::schema::tbl_user;
 
 #[allow(non_snake_case)]
-#[derive(Queryable, AsChangeset, Serialize, Deserialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Deserialize, Debug, Clone, Insertable, Default)]
 #[table_name = "tbl_user"]
-
-#[derive(Default)]
 pub struct User {
     pub uuid : i64,
     pub userID : Option<String>,

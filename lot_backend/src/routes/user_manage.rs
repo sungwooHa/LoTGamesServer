@@ -2,9 +2,11 @@
 
 use crate::db::models::User;
 use crate::db::models::InsertableUser;
+use crate::db::query::update_user_verified_email;
 use crate::db::schema;
 use crate::db::connection::Conn;
 use crate::db::query;
+use crate::util::hash_generator;
 
 use chrono::Utc;
 use diesel::{self, prelude::*};
@@ -47,32 +49,24 @@ pub fn db(conn: Conn) -> Result<Json<Vec<User>>, Status> {
 }
 
 #[get("/users/address/<wallet_address>")]
-pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<Vec<User>>, Status> {
+pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<User>, Status> {
     query::get_user_by_wallet_address(&conn, wallet_address)
         .map(|user| Json(user))
         .map_err(|err| error_status(err))
 }
 
 #[get("/users/verify/<uuid>/<verify_email_hash>")]
-pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email_hash : String) -> Status{
-    
-    let result  = query::get_user_by_uuid_with_email_hash(&conn, uuid, verify_email_hash)
-                            .map(|user| Json(user))
-                            .map_err(|err| error_status(err));
+pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email_hash : String) -> Result<Json<usize>, Status>{
 
-    match result {
-        Ok(val) => {
-            //verify_email으ㄹ true로 바꿔야함.
-            println!("{:?}", val);
-            Status::Ok
-        }
-        Err(_) => Status::InternalServerError,
-    }
+    //Get User info.
+    let mut user : User = match query::get_user_by_uuid_with_email_hash(&conn, uuid, verify_email_hash) {
+        Ok(user) => user,
+        Err(err) => {return Err(error_status(err));},
+    };
 
-    //없을 때는?
-    //verify_eamil을 true로 바꿔주기
-    //이미 있는 경우엔 어떻게 할까?
-
+    update_user_verified_email(&conn, user)
+        .map(|user| Json(user))
+        .map_err(|err| error_status(err))
 }
 
 // #[post("users/<email>/<wallet_address>")]
@@ -80,7 +74,8 @@ pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email
 
 //     //db insert,
 //     //send mail.
-
+    //인증 코드 추가
+    //let verifyEmailHash = hash_generator::generate_hash_with_time(user.userID.unwrap()).unwrap();
 //     //step1. verify_eamil_hash와 만들기
 //     //step2. verify_eamil_hash와 wallet_address로 table insert.
 //     //step3. mail 로 uuid와 vverify_eamil_hash와

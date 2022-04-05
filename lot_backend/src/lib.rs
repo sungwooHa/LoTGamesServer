@@ -19,10 +19,6 @@ mod util;
 mod db;
 mod routes;
 
-pub fn test_generate_hash() {
-    util::hash_generator::generate_hash("test_mail".to_string());
-}
-
 pub fn rocket() -> rocket::Rocket {
     rocket::ignite()
     .manage(db::connection::init_pool())
