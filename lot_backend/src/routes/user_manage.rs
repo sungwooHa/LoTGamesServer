@@ -1,16 +1,20 @@
 
 
+use std::io;
+
 use crate::db::models::User;
 use crate::db::models::InsertableUser;
-use crate::db::query::update_user_verified_email;
 use crate::db::schema;
 use crate::db::connection::Conn;
 use crate::db::query;
 use crate::util::hash_generator;
+use crate::util::mail_system;
+use crate::util::mail_system::MailSubjectType;
 
 use chrono::Utc;
 use diesel::{self, prelude::*};
 use diesel::result::Error;
+use rocket::Response;
 use rocket_contrib::json::Json;
 use rocket::http::Status;
 use rocket::response::status;
@@ -24,7 +28,7 @@ pub fn index() -> &'static str {
 
 #[get("/hello")]
 pub fn hello() -> Json<User>{
-    let user = User{
+    Json(User{
         uuid : 12345,
         userID : None,
         userPW : Some("user_pw".to_string()),
@@ -36,9 +40,9 @@ pub fn hello() -> Json<User>{
         walletAddress : Some("wallet_견ㅅaddress".to_string()),
         verifyEmailHash : Some("verify_email_hash".to_string()),
         verifyEmail : Some(1),
-        txHash : Some("tx_hash".to_string())
-    };
-    Json(user)
+        txHash : Some("tx_hash".to_string()),
+        profileImage : Some("profile Image".to_string())
+    })
 }
 
 #[get("/db")]
@@ -50,7 +54,7 @@ pub fn db(conn: Conn) -> Result<Json<Vec<User>>, Status> {
 
 #[get("/users/address/<wallet_address>")]
 pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<User>, Status> {
-    query::get_user_by_wallet_address(&conn, wallet_address)
+    query::get_user_by_wallet_address(&conn, &wallet_address)
         .map(|user| Json(user))
         .map_err(|err| error_status(err))
 }
@@ -59,39 +63,73 @@ pub fn get_user_by_wallet(conn: Conn, wallet_address : String) -> Result<Json<Us
 pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email_hash : String) -> Result<Json<usize>, Status>{
 
     //Get User info.
-    let mut user : User = match query::get_user_by_uuid_with_email_hash(&conn, uuid, verify_email_hash) {
-        Ok(user) => user,
-        Err(err) => {return Err(error_status(err));},
+    let user = match query::get_user_by_uuid_with_email_hash(&conn, &uuid, &verify_email_hash){
+        Ok(mut user) => {
+            user.verifyEmail = Some(1);
+            user
+        },
+        Err(_) => {return Err(Status::InternalServerError);}
     };
 
-    update_user_verified_email(&conn, user)
+    query::update_user(&conn, &user)
         .map(|user| Json(user))
         .map_err(|err| error_status(err))
 }
 
-// #[post("users/<email>/<wallet_address>")]
-// pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -> Result<_, Status>{
+#[post("/users/<email>/<wallet_address>")]
+pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -> Status {
+    let verify_email_hash = hash_generator::generate_hash_with_time(&email);
 
-//     //db insert,
-//     //send mail.
-    //인증 코드 추가
-    //let verifyEmailHash = hash_generator::generate_hash_with_time(user.userID.unwrap()).unwrap();
-//     //step1. verify_eamil_hash와 만들기
-//     //step2. verify_eamil_hash와 wallet_address로 table insert.
-//     //step3. mail 로 uuid와 vverify_eamil_hash와
+    println!("hash : {}", verify_email_hash);
+    
+    let insert_res = query::insert_user(&conn, {
+        &User{
+            userID : Some(email.clone()),
+            walletAddress : Some(wallet_address),
+            verifyEmailHash : Some(verify_email_hash.clone()),
+            ..Default::default()
+        }
+    });
 
-//     let user_no_verify = diesel::insert_into(tbl_user)
-//     .values(&vec![
-//         (verifyEmailHash.eq(Some(verify_email_hash))),
-//         ]
-//     )
-//     .execute(&*conn)
-//     .expect("can't make email");
+    if insert_res.is_err() {
+        return Status::InternalServerError;
+    }
 
-// }
+    if(mail_system::send_mail(&email, &MailSubjectType::MailVerify, &verify_email_hash).is_err()){
+        return Status::InternalServerError;
+    }
 
-// #[put("users/<wallet_address>/<txhash>/<nickname>")]
-// pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String) -> Result<_, Status>{
+    Status::Ok
+}
+
+ #[put("/users/<wallet_address>/<txhash>/<nickname>/<profileImage>")]
+ pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String, profileImage : String) -> Status {
+
+    let user = match query::get_user_by_wallet_address(&conn, &wallet_address) {
+        Ok(mut user) =>
+        {
+            user.userPW = Some(hash_generator::generate_hash_with_time(&wallet_address));
+            user.nickname = Some(nickname);
+            user.txHash = Some(txhash);
+            user.profileImage = Some(profileImage);
+            user
+        }
+        Err(_) => { return Status::InternalServerError;}
+    };
+
+    if query::update_user(&conn, &user).is_err() {
+        return Status::InternalServerError;
+    }
+
+    if(mail_system::send_mail(&user.userID.unwrap(), 
+                            &MailSubjectType::UserPassword, 
+                            &user.userPW.unwrap())
+                            .is_err()){
+        return Status::InternalServerError;
+    }
+
+    Status::Ok
+ }
 
 //     //wallet address로 찾
 //     //txhash, nickname 맞춰줌

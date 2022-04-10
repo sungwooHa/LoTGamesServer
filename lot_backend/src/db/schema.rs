@@ -12,5 +12,6 @@ table! {
         verifyEmailHash -> Nullable<Varchar>,
         verifyEmail -> Nullable<Unsigned<Tinyint>>,
         txHash -> Nullable<Varchar>,
+        profileImage -> Nullable<Varchar>,
     }
 }

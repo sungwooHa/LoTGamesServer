@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `tbl_user` (
   `verifyEmailHash` varchar(100) DEFAULT NULL,
   `verifyEmail` BOOL DEFAULT 0,
   `txHash` varchar(100) DEFAULT NULL,
+  `profileImage` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`uuid`),
   KEY `userID` (`userID`),
   KEY `userPW` (`userPW`),

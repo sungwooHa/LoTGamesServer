@@ -17,6 +17,7 @@ pub struct User {
     pub verifyEmailHash : Option<String>,
     pub verifyEmail : Option<u8>,
     pub txHash : Option<String>,
+    pub profileImage : Option<String>,
 }
 
 impl User {

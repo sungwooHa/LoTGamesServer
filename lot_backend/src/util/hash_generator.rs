@@ -1,26 +1,20 @@
-
-use rsa::{PublicKey, RsaPublicKey, RsaPrivateKey, PaddingScheme};
+use rand::RngCore;
+use sha2::{Sha256, Sha512, Digest};
+use base64::{encode, decode};
 
 use chrono::prelude::*;
 use chrono::{DateTime, Utc};
 use rand::rngs::OsRng;
 
-pub fn generate_hash_with_time(email : String) -> Result<String, &'static str> {
-    let mut rng = OsRng;
-    let bits = 500;
+pub fn generate_hash_with_time(input : &String) -> String {
+    let mut rng = OsRng.next_u64();
 
-    let priv_key = RsaPrivateKey::new(&mut rng, bits)
-                                .expect("Failed to generate hash : failed to generate a private key");
-    let pub_key = RsaPublicKey::from(&priv_key);
-
-    // get timestamp (nano)
     let timestamp_nanos= Utc::now().timestamp_nanos();       // e.g. `2014-11-28T12:45:59.324310806Z`
-
-    // Encrypt
-
-    match pub_key.encrypt(&mut rng, PaddingScheme::new_pkcs1v15_encrypt(),
-    &(email.to_string() + &timestamp_nanos.to_string()).as_bytes()){
-        Ok(enc_data) => Ok(format!("{:?}", enc_data)),
-        Err(err) => Err("Failed to generate hash : failed to encrypt"),
-    }
+    let hash = Sha256::new().
+                    chain_update(input).
+                    chain_update(timestamp_nanos.to_string()).
+                    chain_update(rng.to_string())
+                    .finalize();
+                    
+    encode(&hash)
 }
