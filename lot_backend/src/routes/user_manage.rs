@@ -127,16 +127,8 @@ pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -
                             .is_err()){
         return Status::InternalServerError;
     }
-
     Status::Ok
  }
-
-//     //wallet address로 찾
-//     //txhash, nickname 맞춰줌
-//     query::get::user::by_wallet_address(&conn, wallet_address)
-//     .map(|user| Json(user))
-//     .map_err(|err| error_status(err))
-// }
 
 fn error_status(err : Error) ->Status{
     match err {

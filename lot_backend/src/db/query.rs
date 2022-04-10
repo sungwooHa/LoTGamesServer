@@ -11,12 +11,6 @@ use rocket_contrib::json::Json;
 
 //SELECT * from user limit 5
 pub fn show_users(conn: &MysqlConnection) -> QueryResult<Vec<User>> {
-
-    // tbl_user.load(&*conn).map_err(|err|-> String {
-    //     println!("Error querying user: {:?}", err);
-    //     "Error querying user from the database".into()
-    // }).map(Json)
-
     tbl_user.limit(5).load::<User>(&*conn)
 }
 
@@ -33,19 +27,7 @@ pub fn get_user_by_wallet_address(conn : &MysqlConnection, _wallet_address : &St
 }
 
 pub fn get_user_by_uuid_with_email_hash(conn: &MysqlConnection, _uuid : &i64, _verify_email_hash : &String) -> QueryResult<User> {
-
     tbl_user.limit(1).filter(uuid.eq(_uuid)).filter(verifyEmailHash.eq(_verify_email_hash)).get_result::<User>(&*conn)
-    
-    // {
-    // .load::<User>(&*conn) {
-    //     Ok(arr_user) => {
-    //         match arr_user.get(0) {
-    //             Some(user) => Ok(user.clone()),
-    //             None => {return Err(Error::NotFound);},
-    //         }
-    //     }
-    //     Err(error) => {return Err(error);},
-    // }
 }
 
 pub fn insert_user(conn : &MysqlConnection, user : &User) -> QueryResult<usize>{
