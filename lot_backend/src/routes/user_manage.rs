@@ -9,9 +9,14 @@ use crate::util::mail_system::MailSubjectType;
 use chrono::Utc;
 use diesel;
 use diesel::result::Error;
-use rocket::request::Form;
+use rocket::State;
 use rocket_contrib::json::Json;
 use rocket::http::Status;
+
+use std::collections::HashMap;
+use std::sync::Mutex;
+type UserMap = Mutex<HashMap<String, String>>;
+
 
 #[get("/")]
 pub fn index() -> &'static str {
@@ -68,8 +73,9 @@ pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email
         .map_err(|err| error_status(err))
 }
 
-#[post("/users", format = "json", data = "<insertable_user>")]
-pub fn sign_in_no_verify(conn : Conn, insertable_user : Form<InsertableUser>) -> Status {
+#[post("/users", format = "application/json", data = "<insertable_user>")]
+pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>, map: State<UserMap>) -> Status {
+
     let verify_email_hash = hash_generator::generate_hash_with_time(&insertable_user.email);
 
     println!("hash : {} / input data : {:?}", verify_email_hash, insertable_user.email);
@@ -77,7 +83,7 @@ pub fn sign_in_no_verify(conn : Conn, insertable_user : Form<InsertableUser>) ->
     let insert_res = query::insert_user(&conn, {
         &User{
             userID : Some(insertable_user.email.clone()),
-            walletAddress : Some(insertable_user.wallet_address.clone()),
+            walletAddress : Some(insertable_user.walletAddress.clone()),
             verifyEmailHash : Some(verify_email_hash.clone()),
             ..Default::default()
         }

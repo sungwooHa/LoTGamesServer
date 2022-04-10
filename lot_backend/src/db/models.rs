@@ -31,8 +31,8 @@ impl User {
 
 
 #[allow(non_snake_case)]
-#[derive(FromForm, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct InsertableUser {
     pub email : String,
-    pub wallet_address : String,
+    pub walletAddress : String,
 }
