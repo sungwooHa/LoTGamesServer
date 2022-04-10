@@ -1,10 +1,5 @@
-
-
-use std::io;
-
 use crate::db::models::User;
 use crate::db::models::InsertableUser;
-use crate::db::schema;
 use crate::db::connection::Conn;
 use crate::db::query;
 use crate::util::hash_generator;
@@ -12,14 +7,11 @@ use crate::util::mail_system;
 use crate::util::mail_system::MailSubjectType;
 
 use chrono::Utc;
-use diesel::{self, prelude::*};
+use diesel;
 use diesel::result::Error;
-use rocket::Response;
+use rocket::request::Form;
 use rocket_contrib::json::Json;
 use rocket::http::Status;
-use rocket::response::status;
-use chrono::{NaiveDate, NaiveDateTime};
-use serde::{Deserialize, Serialize};
 
 #[get("/")]
 pub fn index() -> &'static str {
@@ -76,16 +68,16 @@ pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email
         .map_err(|err| error_status(err))
 }
 
-#[post("/users/<email>/<wallet_address>")]
-pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -> Status {
-    let verify_email_hash = hash_generator::generate_hash_with_time(&email);
+#[post("/users", format = "json", data = "<insertable_user>")]
+pub fn sign_in_no_verify(conn : Conn, insertable_user : Form<InsertableUser>) -> Status {
+    let verify_email_hash = hash_generator::generate_hash_with_time(&insertable_user.email);
 
-    println!("hash : {}", verify_email_hash);
+    println!("hash : {} / input data : {:?}", verify_email_hash, insertable_user.email);
     
     let insert_res = query::insert_user(&conn, {
         &User{
-            userID : Some(email.clone()),
-            walletAddress : Some(wallet_address),
+            userID : Some(insertable_user.email.clone()),
+            walletAddress : Some(insertable_user.wallet_address.clone()),
             verifyEmailHash : Some(verify_email_hash.clone()),
             ..Default::default()
         }
@@ -95,15 +87,15 @@ pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -
         return Status::InternalServerError;
     }
 
-    if(mail_system::send_mail(&email, &MailSubjectType::MailVerify, &verify_email_hash).is_err()){
+    if mail_system::send_mail(&insertable_user.email, &MailSubjectType::MailVerify, &verify_email_hash).is_err(){
         return Status::InternalServerError;
     }
 
     Status::Ok
 }
 
- #[put("/users/<wallet_address>/<txhash>/<nickname>/<profileImage>")]
- pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String, profileImage : String) -> Status {
+ #[put("/users/<wallet_address>/<txhash>/<nickname>/<profile_image>")]
+ pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String, profile_image : String) -> Status {
 
     let user = match query::get_user_by_wallet_address(&conn, &wallet_address) {
         Ok(mut user) =>
@@ -111,7 +103,7 @@ pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -
             user.userPW = Some(hash_generator::generate_hash_with_time(&wallet_address));
             user.nickname = Some(nickname);
             user.txHash = Some(txhash);
-            user.profileImage = Some(profileImage);
+            user.profileImage = Some(profile_image);
             user
         }
         Err(_) => { return Status::InternalServerError;}
@@ -121,10 +113,10 @@ pub fn sign_in_no_verify(conn : Conn, email : String, wallet_address : String) -
         return Status::InternalServerError;
     }
 
-    if(mail_system::send_mail(&user.userID.unwrap(), 
+    if mail_system::send_mail(&user.userID.unwrap(), 
                             &MailSubjectType::UserPassword, 
                             &user.userPW.unwrap())
-                            .is_err()){
+                            .is_err() {
         return Status::InternalServerError;
     }
     Status::Ok

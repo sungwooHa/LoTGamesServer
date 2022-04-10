@@ -31,11 +31,8 @@ impl User {
 
 
 #[allow(non_snake_case)]
-#[derive(/*Queryable, AsChangeset,*/ Serialize, Deserialize)]
+#[derive(FromForm, Serialize, Deserialize)]
 pub struct InsertableUser {
-    pub uuid: i64,
-    pub walletAddress : String,
-    pub verifyEmailHash : String,
-    pub verifyEmail : i8,
-    pub txHash : String,
+    pub email : String,
+    pub wallet_address : String,
 }

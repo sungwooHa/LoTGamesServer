@@ -1,13 +1,10 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 
-use diesel::query_builder::IncompleteInsertStatement;
 use diesel::{self, prelude::*};
-use diesel::update;
 
 use crate::db::models::User;
 use crate::db::schema::tbl_user::dsl::*;
 use diesel::result::Error;
-use rocket_contrib::json::Json;
 
 //SELECT * from user limit 5
 pub fn show_users(conn: &MysqlConnection) -> QueryResult<Vec<User>> {
