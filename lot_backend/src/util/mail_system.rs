@@ -21,6 +21,12 @@ pub fn send_mail(email : &String, subject: &MailSubjectType, contents : &String)
 
     let mut mailer = StubTransport::new_positive();
     
+    // let mut mailer = SmtpClient::new_simple("smtp.hello.com")
+    // .unwrap()
+    // .credentials(Credentials::new("username".into(), "password".into()))
+    // .transport();
+    //let result = mailer.send(email.into());
+
     mailer.send(email.into())
 }
 
