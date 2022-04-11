@@ -32,4 +32,4 @@ base64 = "0.13.0"
 
 #mail
 lettre = "0.9.6"
-lettre_email = "0.9"
+lettre_email = "0.9.4"

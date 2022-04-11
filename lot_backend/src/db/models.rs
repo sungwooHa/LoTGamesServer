@@ -34,5 +34,5 @@ impl User {
 #[derive(Serialize, Deserialize)]
 pub struct InsertableUser {
     pub email : String,
-    pub walletAddress : String,
+    pub wallet_address : String,
 }
