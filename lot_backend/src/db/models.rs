@@ -30,9 +30,14 @@ impl User {
 }
 
 
-#[allow(non_snake_case)]
 #[derive(Serialize, Deserialize)]
 pub struct InsertableUser {
     pub email : String,
     pub wallet_address : String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct VerifyUser {
+    pub uuid : i64,
+    pub verify_email_hash : String
 }

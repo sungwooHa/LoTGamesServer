@@ -1,15 +1,17 @@
-use lettre;
+use lettre::smtp::authentication::IntoCredentials;
+use lettre::smtp::response::Response;
+use lettre::{self, SmtpClient, Transport};
 use lettre_email;
 use lettre_email::EmailBuilder;
-use lettre::stub::{StubTransport, StubResult};
-use lettre::Transport;
+use lettre::smtp::error::Error;
+
 use dotenv::dotenv;
 use std::env;
 
-pub fn send_mail(email : &String, subject: &MailSubjectType, contents : &String) -> StubResult {
+pub fn send_mail(email : &String, subject: &MailSubjectType, contents : &String) -> Result<Response, Error> {
 
     dotenv().ok(); 
-    let lot_server_mail_address = env::var("LOT_SERVER_MAIL").expect("doesn't have LOT Server mail");
+    let lot_server_mail_address = env::var("LOT_SERVER_MAIL").expect("LOT_SERVER_MAIL must be set");
 
     let email = EmailBuilder::new()
         .to(email.clone())
@@ -17,17 +19,21 @@ pub fn send_mail(email : &String, subject: &MailSubjectType, contents : &String)
         .subject(subject.to_string())
         .text(contents)
         .build()
-        .unwrap();
+        .unwrap()
+        .into();
 
-    let mut mailer = StubTransport::new_positive();
     
-    // let mut mailer = SmtpClient::new_simple("smtp.hello.com")
-    // .unwrap()
-    // .credentials(Credentials::new("username".into(), "password".into()))
-    // .transport();
-    //let result = mailer.send(email.into());
+    let smtp_address  = env::var("SMTP_ADDRESS").expect("SMTP_ADDRESS must be set");
+    let username  = env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
+    let password  = env::var("SMTP_USERPASSWORD").expect("SMTP_USERPASSWORD must be set");
 
-    mailer.send(email.into())
+    let credentials = (username, password).into_credentials();
+    let mut client = SmtpClient::new_simple(&smtp_address)
+    .unwrap()
+    .credentials(credentials)
+    .transport();
+
+    client.send(email)
 }
 
 pub enum MailSubjectType

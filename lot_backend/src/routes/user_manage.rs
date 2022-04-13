@@ -88,11 +88,13 @@ pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>) ->
         return Status::InternalServerError;
     }
 
-    if mail_system::send_mail(&insertable_user.email, &MailSubjectType::MailVerify, &verify_email_hash).is_err(){
-        return Status::InternalServerError;
+    match mail_system::send_mail(&insertable_user.email, &MailSubjectType::MailVerify, &verify_email_hash){
+        Ok(_) => Status::Ok,
+        Err(err) => {
+            println!("Mail Error : {:?}", err);
+            Status::InternalServerError
+        }
     }
-
-    Status::Ok
 }
 
  #[put("/users/<wallet_address>/<txhash>/<nickname>/<profile_image>")]
@@ -114,13 +116,13 @@ pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>) ->
         return Status::InternalServerError;
     }
 
-    if mail_system::send_mail(&user.userID.unwrap(), 
-                            &MailSubjectType::UserPassword, 
-                            &user.userPW.unwrap())
-                            .is_err() {
-        return Status::InternalServerError;
+    match mail_system::send_mail(&user.userID.unwrap(),&MailSubjectType::UserPassword,&user.userPW.unwrap()){
+        Ok(_) => Status::Ok,
+        Err(err) => {
+            println!("Mail Error : {:?}", err);
+            Status::InternalServerError
+        }
     }
-    Status::Ok
  }
 
 fn error_status(err : Error) ->Status{
