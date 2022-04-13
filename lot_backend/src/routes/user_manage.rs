@@ -1,6 +1,7 @@
 use crate::db::models::User;
 use crate::db::models::InsertableUser;
 use crate::db::connection::Conn;
+use crate::db::models::VerifyUser;
 use crate::db::query;
 use crate::util::hash_generator;
 use crate::util::mail_system;
@@ -68,17 +69,17 @@ pub fn verify_user_by_uuid_with_eamil_hash(conn : Conn, uuid : i64, verify_email
         .map_err(|err| error_status(err))
 }
 
-#[post("/users", format="application/json", data = "<insertable_user>")]
-pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>) -> Status {
+#[post("/users", format="application/json", data = "<verify_user>")]
+pub fn sign_in_no_verify(conn : Conn, verify_user : Json<VerifyUser>) -> Status {
 
-    let verify_email_hash = hash_generator::generate_hash_with_time(&insertable_user.email);
+    let verify_email_hash = hash_generator::generate_hash_with_time(&verify_user.email);
 
-    println!("hash : {} / input data : {:?}", verify_email_hash, insertable_user.email);
+    println!("hash : {} / input data : {:?}", verify_email_hash, verify_user.email);
     
     let insert_res = query::insert_user(&conn, {
         &User{
-            userID : Some(insertable_user.email.clone()),
-            walletAddress : Some(insertable_user.wallet_address.clone()),
+            userID : Some(verify_user.email.clone()),
+            walletAddress : Some(verify_user.wallet_address.clone()),
             verifyEmailHash : Some(verify_email_hash.clone()),
             ..Default::default()
         }
@@ -88,7 +89,7 @@ pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>) ->
         return Status::InternalServerError;
     }
 
-    match mail_system::send_mail(&insertable_user.email, &MailSubjectType::MailVerify, &verify_email_hash){
+    match mail_system::send_mail(&verify_user.email, &MailSubjectType::MailVerify, &verify_email_hash){
         Ok(_) => Status::Ok,
         Err(err) => {
             println!("Mail Error : {:?}", err);
@@ -97,16 +98,16 @@ pub fn sign_in_no_verify(conn : Conn, insertable_user : Json<InsertableUser>) ->
     }
 }
 
- #[put("/users/<wallet_address>/<txhash>/<nickname>/<profile_image>")]
- pub fn sign_in_final(conn : Conn, wallet_address : String, txhash:String, nickname : String, profile_image : String) -> Status {
+ #[put("/users", format="application/json", data = "<insertable_user>")]
+ pub fn sign_in_final(conn : Conn, insertable_user : Json<InsertableUser>) -> Status {
 
-    let user = match query::get_user_by_wallet_address(&conn, &wallet_address) {
+    let user = match query::get_user_by_wallet_address(&conn, &insertable_user.wallet_address) {
         Ok(mut user) =>
         {
-            user.userPW = Some(hash_generator::generate_hash_with_time(&wallet_address));
-            user.nickname = Some(nickname);
-            user.txHash = Some(txhash);
-            user.profileImage = Some(profile_image);
+            user.userPW = Some(hash_generator::generate_hash_with_time(&insertable_user.wallet_address));
+            user.nickname = Some(insertable_user.nickname.clone());
+            user.txHash = Some(insertable_user.txhash.clone());
+            user.profileImage = Some(insertable_user.profile_image.clone());
             user
         }
         Err(_) => { return Status::InternalServerError;}

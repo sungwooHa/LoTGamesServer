@@ -31,13 +31,15 @@ impl User {
 
 
 #[derive(Serialize, Deserialize)]
-pub struct InsertableUser {
+pub struct VerifyUser {
     pub email : String,
     pub wallet_address : String,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct VerifyUser {
-    pub uuid : i64,
-    pub verify_email_hash : String
+pub struct InsertableUser {
+    pub wallet_address : String,
+    pub txhash : String,
+    pub nickname : String,
+    pub profile_image : String,
 }
