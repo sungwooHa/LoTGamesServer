@@ -1,9 +1,8 @@
-
-use std::ops::Deref;
 use diesel::mysql::*;
 use r2d2;
 use r2d2::PooledConnection;
 use r2d2_diesel::ConnectionManager;
+use std::ops::Deref;
 
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
@@ -15,7 +14,7 @@ use std::env;
 pub type Pool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
 
 pub fn init_pool() -> Pool {
-    dotenv().ok(); 
+    dotenv().ok();
 
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
