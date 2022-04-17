@@ -22,6 +22,7 @@ pub struct ResponseUser {
     pub nickname: String,
     pub verify_email: u8,
     pub profile_image: String,
+    pub wallet_address : String,
 }
 
 impl ResponseUser {
@@ -31,6 +32,7 @@ impl ResponseUser {
             nickname : user_db.nickname.clone().unwrap_or_default(),
             verify_email : user_db.verifyEmail.clone().unwrap_or_default(),
             profile_image : user_db.profileImage.clone().unwrap_or_default(),
+            wallet_address : user_db.walletAddress.clone().unwrap_or_default(),
         }
     }
 }
