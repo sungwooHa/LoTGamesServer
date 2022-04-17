@@ -1,13 +1,13 @@
 use crate::db::models::User;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyUser {
     pub email: String,
     pub wallet_address: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     pub wallet_address: String,
@@ -16,7 +16,8 @@ pub struct InsertableUser {
     pub profile_image: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ResponseUser {
     pub user_id: String,
     pub nickname: String,
@@ -47,7 +48,7 @@ impl ResponseUser {
     }
 }
 
-#[derive(FromForm, Serialize, Deserialize)]
+#[derive(FromForm, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserUuidVerifyEmailHash {
     #[form(field = "uuid")]
@@ -57,7 +58,8 @@ pub struct UserUuidVerifyEmailHash {
     pub verify_email_hash: String,
 }
 
-#[derive(FromForm, Serialize, Deserialize)]
+#[derive(FromForm, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserAddress {
     #[form(field = "walletAddress")]
     pub wallet_address: String,

@@ -24,16 +24,19 @@ mod service;
 mod util;
 
 pub fn rocket() -> rocket::Rocket {
-    rocket::ignite().manage(db::connection::init_pool()).mount(
-        "/",
-        routes![
-            routes::user_controller::index,
-            routes::user_controller::get_user_by_wallet,
-            routes::user_controller::verify_user_by_uuid_with_email_hash,
-            routes::user_controller::sign_in_no_verify,
-            routes::user_controller::sign_in_final,
-        ],
-    ).register(catchers![internal_error, not_found])
+    rocket::ignite()
+        .manage(db::connection::init_pool())
+        .mount(
+            "/",
+            routes![
+                routes::user_controller::index,
+                routes::user_controller::get_user_by_wallet,
+                routes::user_controller::verify_user_by_uuid_with_email_hash,
+                routes::user_controller::sign_in_no_verify,
+                routes::user_controller::sign_in_final,
+            ],
+        )
+        .register(catchers![internal_error, not_found])
 }
 
 #[catch(500)]
