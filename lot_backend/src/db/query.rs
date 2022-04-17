@@ -4,28 +4,16 @@ use diesel::{self, prelude::*};
 
 use crate::db::models::User;
 use crate::db::schema::tbl_user::dsl::*;
-use diesel::result::Error;
 
-//SELECT * from user limit 5
-pub fn show_users(conn: &MysqlConnection) -> QueryResult<Vec<User>> {
-    tbl_user.limit(5).load::<User>(&*conn)
-}
 
 pub fn get_user_by_wallet_address(
     conn: &MysqlConnection,
     _wallet_address: &String,
 ) -> QueryResult<User> {
-    match tbl_user
+    tbl_user
         .limit(1)
         .filter(walletAddress.eq(_wallet_address))
-        .load::<User>(&*conn)
-    {
-        Ok(arr_user) => match arr_user.get(0) {
-            Some(user) => Ok(user.clone()),
-            None => Err(Error::NotFound),
-        },
-        Err(error) => Err(error),
-    }
+        .get_result::<User>(&*conn)
 }
 
 pub fn get_user_by_uuid_with_email_hash(
