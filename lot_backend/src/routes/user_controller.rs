@@ -24,7 +24,7 @@ pub fn get_user_by_wallet(conn: Conn, walletAddress: String) -> status::Custom<J
 
 #[allow(non_snake_case)]
 #[get("/users/verify/<uuid>/<verifyEmailHash>")]
-pub fn verify_user_by_uuid_with_eamil_hash(
+pub fn verify_user_by_uuid_with_email_hash(
     conn: Conn,
     uuid: i64,
     verifyEmailHash: String,

@@ -1,4 +1,4 @@
-use crate::constants::message_constants;
+use crate::constants::{message_constants, url_constants};
 use crate::db::connection::Conn;
 use crate::db::models::User;
 use crate::db::query;
@@ -87,9 +87,23 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user:&VerifyUser) -> ResponseW
         };
     }
 
+    let uuid = if let Ok(user) = query::get_user_by_wallet_address(&conn, &verify_user.wallet_address){
+        user.uuid.to_string()
+    }else{
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response : Response {
+                message : String::from(message_constants::MESSAGE_FAIL_INSERT),
+                data : serde_json::to_value("").unwrap(),
+            }
+        };
+    };
+
+    let mail_contents = format!("{}/users/verify/{}/{}", url_constants::LOT_URL, uuid, &verify_email_hash);
+
     if let Ok(_) = mail_system::send_mail(&verify_user.email, 
         &MailSubjectType::MailVerify, 
-        &verify_email_hash
+        &mail_contents
     ){
         ResponseWithStatus {
             status_code : Status::Ok.code,

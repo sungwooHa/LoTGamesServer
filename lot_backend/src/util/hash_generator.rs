@@ -1,4 +1,3 @@
-use base64::encode;
 use rand::RngCore;
 use sha2::{Digest, Sha256};
 
@@ -13,5 +12,5 @@ pub fn generate_hash_with_time(input: &String) -> String {
         .chain_update(OsRng.next_u64().to_string())
         .finalize();
 
-    encode(&hash)
+    base64_url::encode(&hash)
 }

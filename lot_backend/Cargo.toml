@@ -28,8 +28,7 @@ serde_derive = "1.0"
 #hash
 sha2 = "0.10"
 rand = "0.8.5"
-base64 = "0.13.0"
-
+base64-url = "1.4.13"
 #mail
 lettre = "0.9.6"
 lettre_email = "0.9.4"
