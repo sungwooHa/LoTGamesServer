@@ -32,7 +32,7 @@ impl ResponseUser {
             nickname: user_db.nickname.clone().unwrap_or_default(),
             verify_email: {
                 if let Some(verify) = user_db.verifyEmail {
-                    if verify == 1 as u8 {
+                    if verify == 1_u8 {
                         true
                     } else {
                         false
@@ -45,4 +45,20 @@ impl ResponseUser {
             wallet_address: user_db.walletAddress.clone().unwrap_or_default(),
         }
     }
+}
+
+#[derive(FromForm, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserUuidVerifyEmailHash {
+    #[form(field = "uuid")]
+    pub uuid: i64,
+
+    #[form(field = "emailHash")]
+    pub verify_email_hash: String,
+}
+
+#[derive(FromForm, Serialize, Deserialize)]
+pub struct UserAddress {
+    #[form(field = "walletAddress")]
+    pub wallet_address: String,
 }

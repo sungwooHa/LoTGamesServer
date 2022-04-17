@@ -119,7 +119,7 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
         };
 
     let mail_contents = format!(
-        "{}/users/verify/{}/{}",
+        "{}/users/verify?uuid={}&emailHash={}",
         url_constants::LOT_SRV_URL,
         uuid,
         &verify_email_hash
