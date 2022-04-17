@@ -16,6 +16,16 @@ pub fn get_user_by_wallet_address(
         .get_result::<User>(&*conn)
 }
 
+pub fn get_user_by_email(
+    conn: &MysqlConnection,
+    _email : &String,
+) -> QueryResult<User> {
+    tbl_user
+        .limit(1)
+        .filter(userID.eq(_email))
+        .get_result::<User>(&*conn)
+}
+
 pub fn get_user_by_uuid_with_email_hash(
     conn: &MysqlConnection,
     _uuid: &i64,

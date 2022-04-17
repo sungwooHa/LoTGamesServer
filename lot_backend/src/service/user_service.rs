@@ -68,6 +68,18 @@ pub fn verify_user_by_uuid_with_email_hash(conn: &Conn, uuid: &i64, verify_email
 }
 
 pub fn sign_in_without_verify(conn: &Conn, verify_user:&VerifyUser) -> ResponseWithStatus{
+
+    if let Ok(_) = query::get_user_by_email(&conn, &verify_user.email)
+    {
+        return ResponseWithStatus{
+            status_code : Status::BadRequest.code,
+            response : Response{
+                message : String::from(message_constants::MESSAGE_DUPLICATED_EMAIL),
+                data : serde_json::to_value("").unwrap(),
+            }
+        };
+    }
+
     let verify_email_hash = hash_generator::generate_hash_with_time(&verify_user.email);
     
     if let Err(_) = query::insert_user(&conn, {
