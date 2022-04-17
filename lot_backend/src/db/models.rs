@@ -30,12 +30,14 @@ impl User {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct VerifyUser {
     pub email: String,
     pub wallet_address: String,
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     pub wallet_address: String,
     pub txhash: String,
