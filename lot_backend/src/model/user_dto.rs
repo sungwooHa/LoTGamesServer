@@ -20,7 +20,7 @@ pub struct InsertableUser {
 pub struct ResponseUser {
     pub user_id: String,
     pub nickname: String,
-    pub verify_email: u8,
+    pub verify_email: bool,
     pub profile_image: String,
     pub wallet_address : String,
 }
@@ -30,7 +30,18 @@ impl ResponseUser {
         ResponseUser{
             user_id : user_db.userID.clone().unwrap_or_default(),
             nickname : user_db.nickname.clone().unwrap_or_default(),
-            verify_email : user_db.verifyEmail.clone().unwrap_or_default(),
+            verify_email : {
+                if let Some(verify) = user_db.verifyEmail.clone(){
+                    if verify == 1{
+                        true
+                    }
+                    else{
+                        false
+                    }
+                }else{
+                    false
+                }
+            },
             profile_image : user_db.profileImage.clone().unwrap_or_default(),
             wallet_address : user_db.walletAddress.clone().unwrap_or_default(),
         }
