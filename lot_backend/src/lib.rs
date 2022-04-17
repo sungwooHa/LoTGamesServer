@@ -14,12 +14,12 @@ extern crate r2d2_diesel;
 #[macro_use]
 extern crate serde_derive;
 
-mod db;
-mod routes;
-mod util;
-mod model;
 mod constants;
+mod db;
+mod model;
+mod routes;
 mod service;
+mod util;
 
 pub fn rocket() -> rocket::Rocket {
     rocket::ignite().manage(db::connection::init_pool()).mount(

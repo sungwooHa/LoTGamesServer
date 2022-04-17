@@ -5,7 +5,6 @@ use diesel::{self, prelude::*};
 use crate::db::models::User;
 use crate::db::schema::tbl_user::dsl::*;
 
-
 pub fn get_user_by_wallet_address(
     conn: &MysqlConnection,
     _wallet_address: &String,
@@ -16,10 +15,7 @@ pub fn get_user_by_wallet_address(
         .get_result::<User>(&*conn)
 }
 
-pub fn get_user_by_email(
-    conn: &MysqlConnection,
-    _email : &String,
-) -> QueryResult<User> {
+pub fn get_user_by_email(conn: &MysqlConnection, _email: &String) -> QueryResult<User> {
     tbl_user
         .limit(1)
         .filter(userID.eq(_email))

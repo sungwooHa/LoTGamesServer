@@ -22,28 +22,27 @@ pub struct ResponseUser {
     pub nickname: String,
     pub verify_email: bool,
     pub profile_image: String,
-    pub wallet_address : String,
+    pub wallet_address: String,
 }
 
 impl ResponseUser {
-    pub fn get_response_user_from_userdb(user_db : &User) -> ResponseUser {
-        ResponseUser{
-            user_id : user_db.userID.clone().unwrap_or_default(),
-            nickname : user_db.nickname.clone().unwrap_or_default(),
-            verify_email : {
-                if let Some(verify) = user_db.verifyEmail.clone(){
-                    if verify == 1{
+    pub fn get_response_user_from_userdb(user_db: &User) -> ResponseUser {
+        ResponseUser {
+            user_id: user_db.userID.clone().unwrap_or_default(),
+            nickname: user_db.nickname.clone().unwrap_or_default(),
+            verify_email: {
+                if let Some(verify) = user_db.verifyEmail {
+                    if verify == 1 as u8 {
                         true
-                    }
-                    else{
+                    } else {
                         false
                     }
-                }else{
+                } else {
                     false
                 }
             },
-            profile_image : user_db.profileImage.clone().unwrap_or_default(),
-            wallet_address : user_db.walletAddress.clone().unwrap_or_default(),
+            profile_image: user_db.profileImage.clone().unwrap_or_default(),
+            wallet_address: user_db.walletAddress.clone().unwrap_or_default(),
         }
     }
 }
