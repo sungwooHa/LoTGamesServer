@@ -29,13 +29,17 @@ pub fn verify_user_by_uuid_with_email_hash(
     conn: Conn,
     uuid: i64,
     verifyEmailHash: String,
-) -> status::Custom<Json<Response>> {
+) -> Result<Redirect, status::Custom<Json<Response>>> {
     let response =
         user_service::verify_user_by_uuid_with_email_hash(&conn, &uuid, &verifyEmailHash);
-    status::Custom(
-        Status::from_code(response.status_code).unwrap(),
-        Json(response.response),
-    )
+
+    match Status::from_code(response.status_code).unwrap() {
+        Status::Ok => Ok(Redirect::moved(url_constants::LOT_URL)),
+        _ => Err(status::Custom(
+            Status::from_code(response.status_code).unwrap(),
+            Json(response.response),
+        )),
+    }
 }
 
 #[allow(non_snake_case)]
@@ -56,14 +60,10 @@ pub fn sign_in_no_verify(
 pub fn sign_in_final(
     conn: Conn,
     insertableUser: Json<InsertableUser>,
-) -> Result<Redirect, status::Custom<Json<Response>>> {
+) -> status::Custom<Json<Response>> {
     let response = user_service::sign_in_final(&conn, &insertableUser);
-
-    match Status::from_code(response.status_code).unwrap() {
-        Status::MovedPermanently => Ok(Redirect::moved(url_constants::LOT_URL)),
-        _ => Err(status::Custom(
-            Status::from_code(response.status_code).unwrap(),
-            Json(response.response),
-        )),
-    }
+    status::Custom(
+        Status::from_code(response.status_code).unwrap(),
+        Json(response.response),
+    )
 }

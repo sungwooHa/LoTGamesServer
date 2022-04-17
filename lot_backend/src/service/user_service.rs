@@ -93,7 +93,9 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
             verifyEmailHash: Some(verify_email_hash.clone()),
             ..Default::default()
         }
-    }).is_err() {
+    })
+    .is_err()
+    {
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
@@ -127,7 +129,9 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
         &verify_user.email,
         &MailSubjectType::MailVerify,
         &mail_contents,
-    ).is_ok() {
+    )
+    .is_ok()
+    {
         ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
@@ -178,14 +182,15 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
         };
     }
 
-
     if mail_system::send_mail(
         &user.userID.unwrap(),
         &MailSubjectType::UserPassword,
         &user.userPW.unwrap(),
-    ).is_ok() {
+    )
+    .is_ok()
+    {
         ResponseWithStatus {
-            status_code: Status::MovedPermanently.code,
+            status_code: Status::Ok.code,
             response: Response {
                 message: String::from(message_constants::MESSAGE_OK),
                 data: serde_json::to_value("").unwrap(),
