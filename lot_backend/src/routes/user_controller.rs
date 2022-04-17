@@ -60,7 +60,7 @@ pub fn sign_in_final(
     let response = user_service::sign_in_final(&conn, &insertableUser);
 
     match Status::from_code(response.status_code).unwrap() {
-        Status::MovedPermanently => Ok(Redirect::to(url_constants::LOT_URL)),
+        Status::MovedPermanently => Ok(Redirect::moved(url_constants::LOT_URL)),
         _ => Err(status::Custom(
             Status::from_code(response.status_code).unwrap(),
             Json(response.response),
