@@ -36,7 +36,9 @@ pub fn rocket() -> rocket::Rocket {
         )
         .register(catchers![
             routes::routes_error::internal_error, 
-            routes::routes_error::not_found
+            routes::routes_error::not_found,
+            routes::routes_error::unprocessable_entity,
+            //routes::routes_error::default,
             ],
         )
 }
