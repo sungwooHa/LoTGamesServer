@@ -1,7 +1,5 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-use rocket::Request;
-
 extern crate chrono;
 
 #[macro_use]
@@ -36,15 +34,9 @@ pub fn rocket() -> rocket::Rocket {
                 routes::user_controller::sign_in_final,
             ],
         )
-        .register(catchers![internal_error, not_found])
-}
-
-#[catch(500)]
-fn internal_error() -> &'static str {
-    "Whoops! Looks like we messed up."
-}
-
-#[catch(404)]
-fn not_found(req: &Request) -> String {
-    format!("I couldn't find '{}'. Try something else?", req.uri())
+        .register(catchers![
+            routes::routes_error::internal_error, 
+            routes::routes_error::not_found
+            ],
+        )
 }
