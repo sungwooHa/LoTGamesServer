@@ -3,7 +3,7 @@ use rocket::{Request, http::Status};
 use rocket::response::status;
 use rocket_contrib::json::Json;
 
-use crate::{model::response::Response, constants::message_constants};
+use crate::model::response::Response;
 
 #[catch(404)]
 pub fn not_found(req: &Request) -> status::Custom<Json<Response>> {
