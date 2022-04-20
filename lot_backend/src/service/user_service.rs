@@ -153,7 +153,7 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
 pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseWithStatus {
     let user = match query::get_user_by_wallet_address(&conn, &insertable_user.wallet_address) {
         Ok(mut user) => {
-            user.userPW = Some(hash_generator::generate_hash_with_time(
+            user.userPW = Some(hash_generator::generate_expired_hash(
                 &insertable_user.wallet_address,
             ));
             user.nickname = Some(insertable_user.nickname.clone());
