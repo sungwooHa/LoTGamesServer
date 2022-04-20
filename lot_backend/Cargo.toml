@@ -29,6 +29,9 @@ serde_derive = "1.0"
 sha2 = "0.10"
 rand = "0.8.5"
 base64-url = "1.4.13"
+jsonwebtoken = "8.1.0"
+time = "0.3"
+
 #mail
 lettre = "0.9.6"
 lettre_email = "0.9.4"
