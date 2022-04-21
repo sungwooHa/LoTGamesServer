@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `tbl_user` (
   `uuid` bigint(20) NOT NULL AUTO_INCREMENT,
   `userID` varchar(100) DEFAULT NULL,
-  `userPW` varchar(50) DEFAULT NULL,
+  `userPW` varchar(200) DEFAULT NULL,
   `nickname` varchar(100) DEFAULT NULL,
   `exceptArena` int(11) DEFAULT NULL,
   `regLastLoginDate` datetime DEFAULT CURRENT_TIMESTAMP,
