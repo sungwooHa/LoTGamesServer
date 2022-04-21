@@ -9,8 +9,7 @@ use time::{Duration, OffsetDateTime};
 use std::env;
 use dotenv::dotenv;
 
-use super::jwt_claims::Claims;
-
+use crate::util::jwt_claims;
 
 pub fn generate_hash_with_time(input: &String) -> String {
     let timestamp_nanos = Utc::now().timestamp_nanos(); // e.g. `2014-11-28T12:45:59.324310806Z`
@@ -25,9 +24,9 @@ pub fn generate_hash_with_time(input: &String) -> String {
 
 pub fn generate_expired_hash(input: &String) -> String {
     let iat = OffsetDateTime::now_utc();
-    let exp = iat + Duration::minutes(1);
+    let exp = iat + Duration::days(1);
 
-    let claims = Claims::new(input.to_string(), iat, exp);
+    let claims = jwt_claims::Claims::new(input.to_string(), iat, exp);
 
     dotenv().ok();
     let secret_key = env::var("SECRET_KEY").expect("Secret_key must be set");
