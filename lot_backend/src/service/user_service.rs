@@ -8,6 +8,7 @@ use crate::util::mail_system::MailSubjectType;
 use crate::util::{hash_generator, mail_system};
 
 use rocket::http::Status;
+use time::Duration;
 
 pub fn get_user_by_wallet(conn: &Conn, wallet_address: &String) -> ResponseWithStatus {
     if let Ok(user) = query::get_user_by_wallet_address(&conn, &wallet_address) {
@@ -38,6 +39,17 @@ pub fn verify_user_by_uuid_with_email_hash(
     verify_email_hash: &String,
 ) -> ResponseWithStatus {
     //Get User Info
+
+    if hash_generator::is_expired_hash(&verify_email_hash){
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_EXPIRED_HASH),
+                data: serde_json::to_value("").unwrap(),
+            },
+        };
+    }
+
     let user = match query::get_user_by_uuid_with_email_hash(&conn, &uuid, &verify_email_hash) {
         Ok(mut user) => {
             user.verifyEmail = Some(1);
@@ -84,7 +96,8 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
         };
     }
 
-    let verify_email_hash = hash_generator::generate_hash_with_time(&verify_user.email);
+    let verify_email_hash = hash_generator::generate_expired_hash(
+        &verify_user.email, Duration::hours(1));
 
     if query::insert_user(&conn, {
         &User {
@@ -155,6 +168,7 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
         Ok(mut user) => {
             user.userPW = Some(hash_generator::generate_expired_hash(
                 &insertable_user.wallet_address,
+                Duration::days(1)
             ));
             user.nickname = Some(insertable_user.nickname.clone());
             user.txHash = Some(insertable_user.txhash.clone());

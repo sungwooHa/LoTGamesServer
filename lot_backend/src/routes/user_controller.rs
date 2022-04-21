@@ -30,7 +30,6 @@ pub fn verify_user_by_uuid_with_email_hash(
     conn: Conn,
     user: Form<UserUuidVerifyEmailHash>,
 ) -> Result<Redirect, status::Custom<Json<Response>>> {
-    // let user = user.unwrap();
     let response = user_service::verify_user_by_uuid_with_email_hash(
         &conn,
         &user.uuid,
