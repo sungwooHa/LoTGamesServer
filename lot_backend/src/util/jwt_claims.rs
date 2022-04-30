@@ -1,9 +1,6 @@
-
-
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 //use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
-
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Claims {
@@ -77,9 +74,12 @@ mod jwt_numeric_date {
 
             let claims = Claims::new(sub.clone(), iat, exp);
 
-            let token =
-                encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET.as_ref()))
-                    .expect("Failed to encode claims");
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(SECRET.as_ref()),
+            )
+            .expect("Failed to encode claims");
 
             assert_eq!(&token, EXPECTED_TOKEN);
 
@@ -115,9 +115,12 @@ mod jwt_numeric_date {
 
             let claims = Claims::new(sub.clone(), iat, exp);
 
-            let token =
-                encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET.as_ref()))
-                    .expect("Failed to encode claims");
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(SECRET.as_ref()),
+            )
+            .expect("Failed to encode claims");
 
             let decoded = decode::<Claims>(
                 &token,

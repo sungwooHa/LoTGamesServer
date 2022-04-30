@@ -2,12 +2,16 @@ use crate::constants::{message_constants, url_constants};
 use crate::db::connection::Conn;
 use crate::db::models::User;
 use crate::db::query;
+use crate::model::contract_dto::ContractUser;
 use crate::model::response::{Response, ResponseWithStatus};
 use crate::model::user_dto::{self, InsertableUser, VerifyUser};
 use crate::util::mail_system::MailSubjectType;
 use crate::util::{hash_generator, mail_system};
 
+use dotenv::dotenv;
 use rocket::http::Status;
+use serde_json::json;
+use std::env;
 use time::Duration;
 
 pub fn get_user_by_wallet(conn: &Conn, wallet_address: &String) -> ResponseWithStatus {
@@ -40,7 +44,7 @@ pub fn verify_user_by_uuid_with_email_hash(
 ) -> ResponseWithStatus {
     //Get User Info
 
-    if hash_generator::is_expired_hash(&verify_email_hash){
+    if hash_generator::is_expired_hash(&verify_email_hash) {
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
@@ -85,6 +89,65 @@ pub fn verify_user_by_uuid_with_email_hash(
     }
 }
 
+pub fn find_email_from_contract(verify_user: &VerifyUser) -> ResponseWithStatus {
+    dotenv().ok();
+    let lcd_address = env::var("LCD_ADDRESS").expect("LCD_ADDRESS must be set");
+    let lot_contract = env::var("LOT_CONTRACT").expect("LOT_CONTRACT must be set");
+
+    let encode_parsed = base64::encode_config(
+        serde_json::to_string(&json!({
+            "address" : {
+            "id" : verify_user.email.clone(),
+        }}))
+        .expect("fail to make query"),
+        base64::URL_SAFE,
+    );
+
+    let request_url = format!(
+        "{address}/terra/wasm/v1beta1/contracts/{contract}/store?query_msg={query_msg}",
+        address = lcd_address,
+        contract = lot_contract,
+        query_msg = encode_parsed
+    );
+
+    let response = match reqwest::blocking::get(&request_url) {
+        Ok(response) => response,
+        Err(_) => {
+            return ResponseWithStatus {
+                status_code: Status::BadRequest.code,
+                response: Response {
+                    message: String::from(message_constants::MESSAGE_CANT_FIND_EMAIL_FROM_CONTRACT),
+                    data: serde_json::to_value("").unwrap(),
+                },
+            }
+        }
+    };
+
+    let user_info = response
+        .json::<ContractUser>()
+        .expect("Fail to make user info by contract user info");
+
+    if user_info.query_result.address != verify_user.wallet_address {
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(
+                    message_constants::MESSAGE_DIFFERENT_FROM_CONTRACT_WALLET_ADDRESS,
+                ),
+                data: serde_json::to_value("").unwrap(),
+            },
+        };
+    }
+
+    ResponseWithStatus {
+        status_code: Status::Ok.code,
+        response: Response {
+            message: String::from(message_constants::MESSAGE_OK),
+            data: serde_json::to_value("").unwrap(),
+        },
+    }
+}
+
 pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> ResponseWithStatus {
     if query::get_user_by_email(&conn, &verify_user.email).is_ok() {
         return ResponseWithStatus {
@@ -96,8 +159,8 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
         };
     }
 
-    let verify_email_hash = hash_generator::generate_expired_hash(
-        &verify_user.email, Duration::hours(1));
+    let verify_email_hash =
+        hash_generator::generate_expired_hash(&verify_user.email, Duration::hours(1));
 
     if query::insert_user(&conn, {
         &User {
@@ -168,7 +231,7 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
         Ok(mut user) => {
             user.userPW = Some(hash_generator::generate_expired_hash(
                 &insertable_user.wallet_address,
-                Duration::days(1)
+                Duration::days(1),
             ));
             user.nickname = Some(insertable_user.nickname.clone());
             user.txHash = Some(insertable_user.txhash.clone());

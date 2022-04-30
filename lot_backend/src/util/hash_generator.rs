@@ -1,9 +1,8 @@
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 
-use jsonwebtoken::{EncodingKey, Header, Validation, Algorithm, DecodingKey};
-
-use time::{Duration, OffsetDateTime};
-use std::env;
 use dotenv::dotenv;
+use std::env;
+use time::{Duration, OffsetDateTime};
 
 use crate::util::jwt_claims;
 
@@ -20,7 +19,7 @@ use super::jwt_claims::Claims;
 //     base64_url::encode(&hash)
 // }
 
-pub fn generate_expired_hash(input: &String, expired_duration : Duration) -> String {
+pub fn generate_expired_hash(input: &String, expired_duration: Duration) -> String {
     let iat = OffsetDateTime::now_utc();
     let exp = iat + expired_duration;
 
@@ -33,17 +32,18 @@ pub fn generate_expired_hash(input: &String, expired_duration : Duration) -> Str
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(secret_key.as_ref()),
-    ).unwrap()
+    )
+    .unwrap()
 }
 
-pub fn is_expired_hash(token : &String) -> bool {
-
+pub fn is_expired_hash(token: &String) -> bool {
     dotenv().ok();
     let secret_key = env::var("SECRET_KEY").expect("Secret_key must be set");
 
     jsonwebtoken::decode::<Claims>(
-        &token, 
+        &token,
         &DecodingKey::from_secret(secret_key.as_ref()),
         &Validation::new(Algorithm::HS256),
-    ).is_err()
+    )
+    .is_err()
 }

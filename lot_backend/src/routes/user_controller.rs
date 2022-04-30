@@ -51,6 +51,14 @@ pub fn sign_in_no_verify(
     conn: Conn,
     verifyUser: Json<VerifyUser>,
 ) -> status::Custom<Json<Response>> {
+    let response = user_service::find_email_from_contract(&verifyUser);
+    if Status::from_code(response.status_code).unwrap() != Status::Ok {
+        return status::Custom(
+            Status::from_code(response.status_code).unwrap(),
+            Json(response.response),
+        );
+    }
+
     let response = user_service::sign_in_without_verify(&conn, &verifyUser);
     status::Custom(
         Status::from_code(response.status_code).unwrap(),

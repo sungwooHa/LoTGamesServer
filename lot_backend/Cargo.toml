@@ -10,6 +10,9 @@ edition = "2021"
 rocket = "0.4.10"
 rocket_contrib = { version = "0.4.10", features = ["json", "diesel_mysql_pool"] }
 
+#request 
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+
 #date and time
 chrono = { version = "0.4.6", features = ["serde"] }
 
@@ -28,7 +31,7 @@ serde_derive = "1.0"
 #hash
 sha2 = "0.10"
 rand = "0.8.5"
-base64-url = "1.4.13"
+base64 = "0.13.0"
 jsonwebtoken = "8.1.0"
 time = "0.3"
 
