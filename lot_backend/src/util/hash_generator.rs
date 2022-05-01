@@ -52,10 +52,12 @@ pub fn is_expired_hash(token: &String) -> bool {
     dotenv().ok();
     let secret_key = env::var("SECRET_KEY").expect("Secret_key must be set");
 
-    jsonwebtoken::decode::<Claims>(
+    let token_data = jsonwebtoken::decode::<Claims>(
         &token,
         &DecodingKey::from_secret(secret_key.as_ref()),
         &Validation::new(Algorithm::HS256),
     )
-    .is_err()
+    .expect("fail to decode jwt");
+
+    token_data.claims.is_expired()
 }

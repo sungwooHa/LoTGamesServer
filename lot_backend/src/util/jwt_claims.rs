@@ -34,6 +34,10 @@ impl Claims {
     pub fn get_sub(&self) -> String {
         self.sub.clone()
     }
+
+    pub fn is_expired(&self) -> bool {
+        self.exp < OffsetDateTime::now_utc()
+    }
 }
 
 mod jwt_numeric_date {

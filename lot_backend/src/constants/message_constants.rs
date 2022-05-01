@@ -14,4 +14,5 @@ pub const MESSAGE_CAN_NOT_RESET_PASSWORD: &str = "The number of password resets 
 pub const MESSAGE_DUPLICATED_EMAIL: &str = "duplicated email";
 pub const MESSAGE_EXPIRED_HASH: &str = "expired hash";
 pub const MESSAGE_CANT_FIND_EMAIL_FROM_CONTRACT: &str = "can't find email from contract";
-pub const MESSAGE_CANT_FIND_MATCHED_INFO_FROM_CONTRACT: &str = "can't find matched info from contract";
+pub const MESSAGE_CANT_FIND_MATCHED_INFO_FROM_CONTRACT: &str =
+    "can't find matched info from contract";

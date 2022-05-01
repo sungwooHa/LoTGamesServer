@@ -224,7 +224,7 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
             Ok(mut user_auth_info) => {
                 user_auth_info.password = Some(hash_generator::generate_expired_hash(
                     &COUNT_INIT.to_string(),
-                    Duration::hours(1)
+                    Duration::hours(1),
                 ));
                 user_auth_info.txHash = Some(insertable_user.txhash.clone());
                 user_auth_info
@@ -311,7 +311,7 @@ fn get_contract_info(request_query: String) -> Result<ContractUser, ResponseWith
             .json::<ContractUser>()
             .expect("Fail to make user info by contract user info")),
         Err(_) => {
-            return Err(ResponseWithStatus {
+            Err(ResponseWithStatus {
                 status_code: Status::BadRequest.code,
                 response: Response {
                     message: String::from(
@@ -319,7 +319,7 @@ fn get_contract_info(request_query: String) -> Result<ContractUser, ResponseWith
                     ),
                     data: serde_json::to_value("").unwrap(),
                 },
-            });
+            })
         }
     }
 }
@@ -391,9 +391,9 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
     let mut user_auth_info = user_auth_info;
     user_auth_info.password = Some(hash_generator::generate_expired_hash(
         &contract_info.query_result.count.to_string(),
-        Duration::hours(1)
+        Duration::hours(1),
     ));
-    
+
     if auth_query::update_user(&conn, &user_auth_info).is_err() {
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
@@ -409,24 +409,20 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
         &user_auth_info.email.unwrap(),
         &MailSubjectType::UserPassword,
         &user_auth_info.password.unwrap(),
-    ){
-        Ok(_) => {
-            ResponseWithStatus {
-                status_code: Status::Ok.code,
-                response: Response {
-                    message: String::from(message_constants::MESSAGE_OK),
-                    data: serde_json::to_value("").unwrap(),
-                },
-            }
+    ) {
+        Ok(_) => ResponseWithStatus {
+            status_code: Status::Ok.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_OK),
+                data: serde_json::to_value("").unwrap(),
+            },
         },
-        Err(_) => {
-            ResponseWithStatus {
-                status_code: Status::BadRequest.code,
-                response: Response {
-                    message: String::from(message_constants::MESSAGE_FAIL_SEND_MAIL),
-                    data: serde_json::to_value("").unwrap(),
-                },
-            }
+        Err(_) => ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_FAIL_SEND_MAIL),
+                data: serde_json::to_value("").unwrap(),
+            },
         },
     }
 }
