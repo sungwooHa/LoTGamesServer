@@ -1,4 +1,4 @@
 pub mod connection;
-pub mod models;
+pub mod model;
 pub mod query;
 pub mod schema;

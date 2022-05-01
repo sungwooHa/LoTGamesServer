@@ -1,4 +1,4 @@
-use crate::db::models::User;
+use crate::db::model::user::{User, UserAuthInfo};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,28 +22,27 @@ pub struct ResponseUser {
     pub user_id: String,
     pub nickname: String,
     pub verify_email: bool,
+    pub verify_wallet: bool,
     pub profile_image: String,
-    pub wallet_address: String,
 }
 
 impl ResponseUser {
-    pub fn get_response_user_from_userdb(user_db: &User) -> ResponseUser {
+    pub fn get_response_user_from_userdb(
+        user_db: &User,
+        user_auth_info: &UserAuthInfo,
+    ) -> ResponseUser {
         ResponseUser {
-            user_id: user_db.userID.clone().unwrap_or_default(),
+            user_id: user_db.uuid.clone().to_string(),
             nickname: user_db.nickname.clone().unwrap_or_default(),
             verify_email: {
-                if let Some(verify) = user_db.verifyEmail {
-                    if verify == 1_u8 {
-                        true
-                    } else {
-                        false
-                    }
+                if let Some(verify) = user_auth_info.verifyEmail {
+                    verify
                 } else {
                     false
                 }
             },
+            verify_wallet: user_auth_info.txHash.is_some(),
             profile_image: user_db.profileImage.clone().unwrap_or_default(),
-            wallet_address: user_db.walletAddress.clone().unwrap_or_default(),
         }
     }
 }

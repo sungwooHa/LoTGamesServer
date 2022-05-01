@@ -30,8 +30,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    tbl_auth,
-    tbl_user,
-    tbl_user_token,
-);
+allow_tables_to_appear_in_same_query!(tbl_auth, tbl_user, tbl_user_token,);

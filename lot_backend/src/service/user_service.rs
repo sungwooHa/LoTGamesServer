@@ -1,7 +1,7 @@
 use crate::constants::{message_constants, url_constants};
 use crate::db::connection::Conn;
-use crate::db::models::User;
-use crate::db::query;
+use crate::db::model::user;
+use crate::db::query::*;
 use crate::model::contract_dto::ContractUser;
 use crate::model::response::{Response, ResponseWithStatus};
 use crate::model::user_dto::{self, InsertableUser, VerifyUser};
@@ -15,13 +15,27 @@ use std::env;
 use time::Duration;
 
 pub fn get_user_by_wallet(conn: &Conn, wallet_address: &String) -> ResponseWithStatus {
-    if let Ok(user) = query::get_user_by_wallet_address(&conn, &wallet_address) {
+    let user_auth_info = match auth_query::get_user_by_wallet_address(&conn, &wallet_address) {
+        Ok(user_auth_info) => user_auth_info,
+        Err(_) => {
+            return ResponseWithStatus {
+                status_code: Status::BadRequest.code,
+                response: Response {
+                    message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
+                    data: serde_json::to_value("").unwrap(),
+                },
+            }
+        }
+    };
+
+    if let Ok(user) = user_query::get_user_by_uuid(&conn, &user_auth_info.seq) {
         ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
                 message: String::from(message_constants::MESSAGE_OK),
                 data: serde_json::to_value(user_dto::ResponseUser::get_response_user_from_userdb(
                     &user,
+                    &user_auth_info,
                 ))
                 .unwrap(),
             },
@@ -30,7 +44,7 @@ pub fn get_user_by_wallet(conn: &Conn, wallet_address: &String) -> ResponseWithS
         ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
-                message: String::from(message_constants::MESSAGE_NOT_FOUND),
+                message: String::from(message_constants::MESSAGE_NOT_FOUND_USER),
                 data: serde_json::to_value("").unwrap(),
             },
         }
@@ -54,23 +68,24 @@ pub fn verify_user_by_uuid_with_email_hash(
         };
     }
 
-    let user = match query::get_user_by_uuid_with_email_hash(&conn, &uuid, &verify_email_hash) {
-        Ok(mut user) => {
-            user.verifyEmail = Some(1);
-            user
-        }
-        Err(_) => {
-            return ResponseWithStatus {
-                status_code: Status::BadRequest.code,
-                response: Response {
-                    message: String::from(message_constants::MESSAGE_NOT_FOUND),
-                    data: serde_json::to_value("").unwrap(),
-                },
-            };
-        }
-    };
+    let user_auth_info =
+        match auth_query::get_user_by_uuid_with_email_hash(&conn, &uuid, &verify_email_hash) {
+            Ok(mut user_auth_info) => {
+                user_auth_info.verifyEmail = Some(true);
+                user_auth_info
+            }
+            Err(_) => {
+                return ResponseWithStatus {
+                    status_code: Status::BadRequest.code,
+                    response: Response {
+                        message: String::from(message_constants::MESSAGE_NOT_FOUND),
+                        data: serde_json::to_value("").unwrap(),
+                    },
+                };
+            }
+        };
 
-    if query::update_user(&conn, &user).is_ok() {
+    if auth_query::update_user(&conn, &user_auth_info).is_ok() {
         ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
@@ -149,7 +164,7 @@ pub fn find_email_from_contract(verify_user: &VerifyUser) -> ResponseWithStatus 
 }
 
 pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> ResponseWithStatus {
-    if query::get_user_by_email(&conn, &verify_user.email).is_ok() {
+    if auth_query::get_user_by_email(&conn, &verify_user.email).is_ok() {
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
@@ -162,9 +177,9 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
     let verify_email_hash =
         hash_generator::generate_expired_hash(&verify_user.email, Duration::hours(1));
 
-    if query::insert_user(&conn, {
-        &User {
-            userID: Some(verify_user.email.clone()),
+    if auth_query::insert_user(&conn, {
+        &user::UserAuthInfo {
+            email: Some(verify_user.email.clone()),
             walletAddress: Some(verify_user.wallet_address.clone()),
             verifyEmailHash: Some(verify_email_hash.clone()),
             ..Default::default()
@@ -175,24 +190,25 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
-                message: String::from(message_constants::MESSAGE_FAIL_INSERT),
+                message: String::from(message_constants::MESSAGE_FAIL_INSERT_USER_AUTH_INFO),
                 data: serde_json::to_value("").unwrap(),
             },
         };
     }
 
-    let uuid =
-        if let Ok(user) = query::get_user_by_wallet_address(&conn, &verify_user.wallet_address) {
-            user.uuid.to_string()
-        } else {
-            return ResponseWithStatus {
-                status_code: Status::BadRequest.code,
-                response: Response {
-                    message: String::from(message_constants::MESSAGE_FAIL_INSERT),
-                    data: serde_json::to_value("").unwrap(),
-                },
-            };
+    let uuid = if let Ok(user) =
+        auth_query::get_user_by_wallet_address(&conn, &verify_user.wallet_address)
+    {
+        user.seq.to_string()
+    } else {
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_FAIL_INSERT_USER_AUTH_INFO),
+                data: serde_json::to_value("").unwrap(),
+            },
         };
+    };
 
     let mail_contents = format!(
         "{}/users/verify?uuid={}&emailHash={}",
@@ -227,42 +243,60 @@ pub fn sign_in_without_verify(conn: &Conn, verify_user: &VerifyUser) -> Response
 }
 
 pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseWithStatus {
-    let user = match query::get_user_by_wallet_address(&conn, &insertable_user.wallet_address) {
-        Ok(mut user) => {
-            user.userPW = Some(hash_generator::generate_expired_hash(
-                &insertable_user.wallet_address,
-                Duration::days(1),
-            ));
-            user.nickname = Some(insertable_user.nickname.clone());
-            user.txHash = Some(insertable_user.txhash.clone());
-            user.profileImage = Some(insertable_user.profile_image.clone());
-            user
-        }
-        Err(_) => {
-            return ResponseWithStatus {
-                status_code: Status::BadRequest.code,
-                response: Response {
-                    message: String::from(message_constants::MESSAGE_NOT_FOUND),
-                    data: serde_json::to_value("").unwrap(),
-                },
-            };
-        }
-    };
+    let user_auth_info =
+        match auth_query::get_user_by_wallet_address(&conn, &insertable_user.wallet_address) {
+            Ok(mut user_auth_info) => {
+                user_auth_info.password = Some(hash_generator::generate_expired_hash(
+                    &insertable_user.wallet_address,
+                    Duration::days(1),
+                ));
+                user_auth_info.txHash = Some(insertable_user.txhash.clone());
+                user_auth_info
+            }
+            Err(_) => {
+                return ResponseWithStatus {
+                    status_code: Status::BadRequest.code,
+                    response: Response {
+                        message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
+                        data: serde_json::to_value("").unwrap(),
+                    },
+                };
+            }
+        };
 
-    if query::update_user(&conn, &user).is_err() {
+    if auth_query::update_user(&conn, &user_auth_info).is_err() {
         return ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
-                message: String::from(message_constants::MESSAGE_FAIL_UPDATE),
+                message: String::from(message_constants::MESSAGE_FAIL_UPDATE_USER_AUTH_INFO),
+                data: serde_json::to_value("").unwrap(),
+            },
+        };
+    }
+
+    if user_query::insert_user(&conn, {
+        &user::User {
+            uuid: user_auth_info.seq,
+            nickname: Some(insertable_user.nickname.clone()),
+            profileImage: Some(insertable_user.profile_image.clone()),
+            ..Default::default()
+        }
+    })
+    .is_err()
+    {
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_FAIL_INSERT_USER),
                 data: serde_json::to_value("").unwrap(),
             },
         };
     }
 
     if mail_system::send_mail(
-        &user.userID.unwrap(),
+        &user_auth_info.email.unwrap(),
         &MailSubjectType::UserPassword,
-        &user.userPW.unwrap(),
+        &user_auth_info.password.unwrap(),
     )
     .is_ok()
     {
