@@ -3,8 +3,8 @@ use crate::db::connection::Conn;
 use crate::db::model::user;
 use crate::db::query::*;
 use crate::model::contract_dto::ContractUser;
-use crate::model::response::{Response, ResponseWithStatus};
-use crate::model::user_dto::{self, InsertableUser, VerifyUser};
+use crate::model::response::{self, Response, ResponseWithStatus};
+use crate::model::user_dto::{InsertableUser, VerifyUser};
 use crate::util::mail_system::MailSubjectType;
 use crate::util::{hash_generator, mail_system};
 
@@ -33,7 +33,7 @@ pub fn get_user_by_wallet(conn: &Conn, wallet_address: &String) -> ResponseWithS
             status_code: Status::Ok.code,
             response: Response {
                 message: String::from(message_constants::MESSAGE_OK),
-                data: serde_json::to_value(user_dto::ResponseUser::get_response_user_from_userdb(
+                data: serde_json::to_value(response::ResponseUser::get_response_user_from_userdb(
                     &user,
                     &user_auth_info,
                 ))
