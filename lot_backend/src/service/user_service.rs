@@ -342,7 +342,7 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
         Ok(user_auth_info) => user_auth_info,
         Err(_) => {
             return ResponseWithStatus {
-                status_code: Status::BadRequest.code,
+                status_code: Status::NotFound.code,
                 response: Response {
                     message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
                     data: serde_json::to_value("").unwrap(),
@@ -403,6 +403,32 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
             },
         };
     }
+
+    match token_query::get_user_by_uuid(&conn, &user_auth_info.seq)
+    {
+        Ok(mut user_token) => {
+            user_token.token=Some("".to_string());
+            if token_query::update_user_token(&conn, &user_token).is_err() {
+                return ResponseWithStatus {
+                    status_code: Status::BadRequest.code,
+                    response: Response {
+                        message: String::from(message_constants::MESSAGE_FAIL_UPDATE_USER_TOKEN),
+                        data: serde_json::to_value("").unwrap(),
+                    },
+                }
+            }
+        },
+        Err(_) => {
+            return ResponseWithStatus {
+                status_code: Status::NotFound.code,
+                response: Response {
+                    message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_TOKEN),
+                    data: serde_json::to_value("").unwrap(),
+                },
+            }
+        }
+    };
+
 
     //다시 메일 보내주기
     match mail_system::send_mail(
