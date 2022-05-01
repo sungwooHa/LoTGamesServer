@@ -24,3 +24,9 @@ CREATE TABLE IF NOT EXISTS `tbl_user` (
   KEY `nickname` (`nickname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `tbl_user_token` (
+  `uuid` bigint(20) DEFAULT NULL,
+  `token` text DEFAULT NULL,
+  `regDate` datetime DEFAULT NULL,
+  KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

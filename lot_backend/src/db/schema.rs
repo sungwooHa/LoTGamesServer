@@ -24,7 +24,7 @@ table! {
 
 table! {
     tbl_user_token (uuid) {
-        uuid -> Bigint,
+        uuid -> Nullable<Bigint>,
         token -> Nullable<Text>,
         regDate -> Nullable<Datetime>,
     }

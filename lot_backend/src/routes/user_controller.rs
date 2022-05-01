@@ -1,7 +1,7 @@
 use crate::constants::url_constants;
 use crate::db::connection::Conn;
 use crate::model::response::Response;
-use crate::model::user_dto::{InsertableUser, UserAddress, UserUuidVerifyEmailHash, VerifyUser};
+use crate::model::user_dto::{InsertableUser, RequestWalletAddress, UserUuidVerifyEmailHash, VerifyUser};
 use crate::service::user_service;
 
 use rocket::http::Status;
@@ -16,7 +16,7 @@ pub fn index() -> &'static str {
 
 #[allow(non_snake_case)]
 #[get("/users/address?<user..>")]
-pub fn get_user_by_wallet(conn: Conn, user: Form<UserAddress>) -> status::Custom<Json<Response>> {
+pub fn get_user_by_wallet(conn: Conn, user: Form<RequestWalletAddress>) -> status::Custom<Json<Response>> {
     let response = user_service::get_user_by_wallet(&conn, &user.wallet_address);
     status::Custom(
         Status::from_code(response.status_code).unwrap(),
@@ -73,6 +73,19 @@ pub fn sign_in_final(
     insertableUser: Json<InsertableUser>,
 ) -> status::Custom<Json<Response>> {
     let response = user_service::sign_in_final(&conn, &insertableUser);
+    status::Custom(
+        Status::from_code(response.status_code).unwrap(),
+        Json(response.response),
+    )
+}
+
+#[allow(non_snake_case)]
+#[post("/users/address/<walletAddress>/token", format = "application/json")]
+pub fn token_reissuance_request(
+    conn: Conn,
+    walletAddress: String,
+) -> status::Custom<Json<Response>> {
+    let response = user_service::token_reissuance(&conn, walletAddress);
     status::Custom(
         Status::from_code(response.status_code).unwrap(),
         Json(response.response),

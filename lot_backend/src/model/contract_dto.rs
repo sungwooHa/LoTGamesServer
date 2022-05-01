@@ -13,8 +13,8 @@ pub struct UserInfo {
     pub count: i64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct QueryAddress {
-    pub id: String,
-}
+// #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct QueryAddress {
+//     pub id: String,
+// }

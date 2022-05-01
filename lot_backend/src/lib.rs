@@ -32,6 +32,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::user_controller::verify_user_by_uuid_with_email_hash,
                 routes::user_controller::sign_in_no_verify,
                 routes::user_controller::sign_in_final,
+                routes::user_controller::token_reissuance_request,
             ],
         )
         .register(catchers![

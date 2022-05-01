@@ -317,3 +317,65 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
         }
     }
 }
+
+pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStatus {
+
+    dotenv().ok();
+    let lcd_address = env::var("LCD_ADDRESS").expect("LCD_ADDRESS must be set");
+    let lot_contract = env::var("LOT_CONTRACT").expect("LOT_CONTRACT must be set");
+
+    let encode_parsed = base64::encode_config(
+        serde_json::to_string(&json!({
+            "id" : {
+            "address" : wallet_address,
+        }}))
+        .expect("fail to make query"),
+        base64::URL_SAFE,
+    );
+
+    let request_url = format!(
+        "{address}/terra/wasm/v1beta1/contracts/{contract}/store?query_msg={query_msg}",
+        address = lcd_address,
+        contract = lot_contract,
+        query_msg = encode_parsed
+    );
+
+    let response = match reqwest::blocking::get(&request_url) {
+        Ok(response) => response,
+        Err(_) => {
+            return ResponseWithStatus {
+                status_code: Status::BadRequest.code,
+                response: Response {
+                    message: String::from(message_constants::MESSAGE_CANT_FIND_WALEET_ADDRESS_FROM_CONTRACT),
+                    data: serde_json::to_value("").unwrap(),
+                },
+            }
+        }
+    };
+
+    let user_info = response
+    .json::<ContractUser>()
+    .expect("Fail to make user info by contract user info");
+
+
+    // let user_token = match token_query::get_user_by_uuid(&conn, &) {
+    //     Ok(user_auth_info) => user_auth_info,
+    //     Err(_) => {
+    //         return ResponseWithStatus {
+    //             status_code: Status::BadRequest.code,
+    //             response: Response {
+    //                 message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
+    //                 data: serde_json::to_value("").unwrap(),
+    //             },
+    //         }
+    //     }
+    // };
+
+    ResponseWithStatus {
+        status_code: Status::Ok.code,
+        response: Response {
+            message: String::from(message_constants::MESSAGE_OK),
+            data: serde_json::to_value("").unwrap(),
+        },
+    }
+}

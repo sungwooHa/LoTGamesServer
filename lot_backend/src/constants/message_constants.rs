@@ -11,5 +11,6 @@ pub const MESSAGE_FAIL_SEND_MAIL: &str = "fail to sending mail";
 pub const MESSAGE_DUPLICATED_EMAIL: &str = "duplicated email";
 pub const MESSAGE_EXPIRED_HASH: &str = "expired hash";
 pub const MESSAGE_CANT_FIND_EMAIL_FROM_CONTRACT: &str = "can't find email from contract";
+pub const MESSAGE_CANT_FIND_WALEET_ADDRESS_FROM_CONTRACT: &str = "can't find wallet address from contract";
 pub const MESSAGE_DIFFERENT_FROM_CONTRACT_WALLET_ADDRESS: &str =
     "It is different from the contract wallet address.";

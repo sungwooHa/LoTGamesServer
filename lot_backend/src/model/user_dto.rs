@@ -27,7 +27,7 @@ pub struct UserUuidVerifyEmailHash {
 
 #[derive(FromForm, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct UserAddress {
+pub struct RequestWalletAddress {
     #[form(field = "walletAddress")]
     pub wallet_address: String,
 }
