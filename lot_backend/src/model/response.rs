@@ -17,7 +17,7 @@ pub struct ResponseWithStatus {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ResponseUser {
-    pub user_id: String,
+    pub email: String,
     pub nickname: String,
     pub verify_email: bool,
     pub verify_wallet: bool,
@@ -30,7 +30,7 @@ impl ResponseUser {
         user_auth_info: &UserAuthInfo,
     ) -> ResponseUser {
         ResponseUser {
-            user_id: user_db.uuid.clone().to_string(),
+            email: user_auth_info.email.clone().unwrap_or_default(),
             nickname: user_db.nickname.clone().unwrap_or_default(),
             verify_email: {
                 if let Some(verify) = user_auth_info.verifyEmail {
