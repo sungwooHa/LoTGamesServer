@@ -32,7 +32,7 @@ impl Claims {
         Self { sub, iat, exp }
     }
     pub fn get_sub(&self) -> String {
-        self.sub
+        self.sub.clone()
     }
 }
 

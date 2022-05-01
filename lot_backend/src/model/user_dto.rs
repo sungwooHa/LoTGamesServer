@@ -1,4 +1,3 @@
-
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VerifyUser {
@@ -34,6 +33,6 @@ pub struct RequestWalletAddress {
 
 #[derive(Deserialize, Serialize)]
 pub struct TokenWithCount {
-    pub token : String,
-    pub count : u32,
+    pub token: String,
+    pub count: u32,
 }

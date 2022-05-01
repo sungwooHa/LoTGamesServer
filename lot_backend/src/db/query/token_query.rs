@@ -1,5 +1,5 @@
-use diesel::{self, prelude::*};
 use diesel::MysqlConnection;
+use diesel::{self, prelude::*};
 
 use crate::db::model::user::UserToken;
 use crate::db::schema::tbl_user_token::dsl::*;
