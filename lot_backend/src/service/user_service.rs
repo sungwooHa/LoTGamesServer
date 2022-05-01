@@ -246,8 +246,14 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
     let user_auth_info =
         match auth_query::get_user_by_wallet_address(&conn, &insertable_user.wallet_address) {
             Ok(mut user_auth_info) => {
+
+                let subject = serde_json::to_string(&json!({
+                    "count" : 0,
+                    "address" : insertable_user.wallet_address.clone(),
+                })).expect("can't make token(password)");
+                
                 user_auth_info.password = Some(hash_generator::generate_expired_hash(
-                    &insertable_user.wallet_address,
+                    &subject,
                     Duration::days(1),
                 ));
                 user_auth_info.txHash = Some(insertable_user.txhash.clone());
@@ -358,18 +364,33 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
     .expect("Fail to make user info by contract user info");
 
 
-    // let user_token = match token_query::get_user_by_uuid(&conn, &) {
-    //     Ok(user_auth_info) => user_auth_info,
-    //     Err(_) => {
-    //         return ResponseWithStatus {
-    //             status_code: Status::BadRequest.code,
-    //             response: Response {
-    //                 message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
-    //                 data: serde_json::to_value("").unwrap(),
-    //             },
-    //         }
-    //     }
-    // };
+    let user_auth_info = match auth_query::get_user_by_email(&conn, &user_info.query_result.id){
+        Ok(user_auth_info) => user_auth_info,
+        Err(_) => return ResponseWithStatus {
+                        status_code: Status::BadRequest.code,
+                        response: Response {
+                            message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_AUTH_INFO),
+                            data: serde_json::to_value("").unwrap(),
+                        },
+                    },
+    };
+    
+    let user_token = match token_query::get_user_by_uuid(&conn, &user_auth_info.seq) {
+        Ok(user_auth_info) => user_auth_info,
+        Err(_) => {
+            return ResponseWithStatus {
+                status_code: Status::BadRequest.code,
+                response: Response {
+                    message: String::from(message_constants::MESSAGE_NOT_FOUND_USER_TOKEN),
+                    data: serde_json::to_value("").unwrap(),
+                },
+            }
+        }
+    };
+
+
+    if(user_info.query_result.count > user_token.)
+
 
     ResponseWithStatus {
         status_code: Status::Ok.code,

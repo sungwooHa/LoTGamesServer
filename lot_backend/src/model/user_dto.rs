@@ -31,3 +31,9 @@ pub struct RequestWalletAddress {
     #[form(field = "walletAddress")]
     pub wallet_address: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct TokenWithCount {
+    pub token : String,
+    pub count : u32,
+}

@@ -1,4 +1,4 @@
-use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, TokenData};
 
 use dotenv::dotenv;
 use std::env;
@@ -35,6 +35,23 @@ pub fn generate_expired_hash(input: &String, expired_duration: Duration) -> Stri
     )
     .unwrap()
 }
+
+pub fn decode_toekn(token: &String) -> Option<String> {
+    dotenv().ok();
+    let secret_key = env::var("SECRET_KEY").expect("Secret_key must be set");
+
+    let res_token = jsonwebtoken::decode::<Claims>(
+        &token,
+        &DecodingKey::from_secret(secret_key.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    );
+
+    match res_token {
+        Ok(token_data) => Some(token_data.claims.get_sub()),
+        Err(_) => None,
+    }
+}
+
 
 pub fn is_expired_hash(token: &String) -> bool {
     dotenv().ok();

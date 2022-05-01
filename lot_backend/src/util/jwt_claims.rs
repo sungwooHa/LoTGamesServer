@@ -31,6 +31,9 @@ impl Claims {
 
         Self { sub, iat, exp }
     }
+    pub fn get_sub(&self) -> String {
+        self.sub
+    }
 }
 
 mod jwt_numeric_date {

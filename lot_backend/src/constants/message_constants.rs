@@ -1,6 +1,7 @@
 pub const MESSAGE_OK: &str = "ok";
 pub const MESSAGE_NOT_FOUND_USER_AUTH_INFO: &str = "not found user_auth_info";
 pub const MESSAGE_NOT_FOUND_USER: &str = "not found user";
+pub const MESSAGE_NOT_FOUND_USER_TOKEN : &str = "not found user";
 pub const MESSAGE_NOT_FOUND: &str = "not found";
 pub const MESSAGE_CANT_VERIFY: &str = "can't verify";
 pub const MESSAGE_FAIL_INSERT_USER: &str = "Fail to inserting user";
