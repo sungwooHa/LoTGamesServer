@@ -39,7 +39,6 @@ pub fn generate_expired_hash(input: &String, expired_duration: Duration) -> Stri
 pub fn decode_token(token: &String) -> Result<String, String> {
     dotenv().ok();
     let secret_key = env::var("SECRET_KEY").expect("Secret_key must be set");
-
     jsonwebtoken::decode::<Claims>(
         &token,
         &DecodingKey::from_secret(secret_key.as_ref()),

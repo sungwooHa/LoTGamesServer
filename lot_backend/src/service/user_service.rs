@@ -224,7 +224,7 @@ pub fn sign_in_final(conn: &Conn, insertable_user: &InsertableUser) -> ResponseW
             Ok(mut user_auth_info) => {
                 user_auth_info.password = Some(hash_generator::generate_expired_hash(
                     &COUNT_INIT.to_string(),
-                    Duration::MAX,
+                    Duration::hours(1)
                 ));
                 user_auth_info.txHash = Some(insertable_user.txhash.clone());
                 user_auth_info
@@ -387,7 +387,23 @@ pub fn token_reissuance(conn: &Conn, wallet_address: String) -> ResponseWithStat
             },
         };
     }
+
+    let mut user_auth_info = user_auth_info;
+    user_auth_info.password = Some(hash_generator::generate_expired_hash(
+        &contract_info.query_result.count.to_string(),
+        Duration::hours(1)
+    ));
     
+    if auth_query::update_user(&conn, &user_auth_info).is_err() {
+        return ResponseWithStatus {
+            status_code: Status::BadRequest.code,
+            response: Response {
+                message: String::from(message_constants::MESSAGE_FAIL_UPDATE_USER_AUTH_INFO),
+                data: serde_json::to_value("").unwrap(),
+            },
+        };
+    }
+
     //다시 메일 보내주기
     match mail_system::send_mail(
         &user_auth_info.email.unwrap(),
