@@ -1,2 +1,2 @@
-# LoTGamesServer
-LoT Backend 
+#
+Web Srv
